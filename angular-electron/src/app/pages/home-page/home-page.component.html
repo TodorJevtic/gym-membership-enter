@@ -1,0 +1,33 @@
+<div
+  class="h-screen w-screen bg-cover bg-center"
+  [ngStyle]="{'background-image': 'url(' + backgroundUrl + ')'}">
+    <div class="w-full h-full outfit relative">
+        <div class="absolute top-12 left-10 flex justify-center items-center space-x-6">
+            <img (click)="changeLanguage('en')" class="cursor-pointer h-16" src="assets/engleska.png" alt="Logo">
+            <img (click)="changeLanguage('sr')" class="cursor-pointer h-20" src="assets/srbija.png" alt="Logo">
+        </div>
+        <div class="absolute top-14 right-10 flex uppercase text-2xl text-green-50 space-x-10 bg-[#47bfa6] p-3 rounded">
+            <p>{{ currentText[2] }}:</p>
+            <p>{{balance}} RSD</p>
+        </div>
+        <div class="w-full h-full py-10 flex flex-col items-center justify-between">
+            <div class="w-24">
+                <img routerLink="/login" src="assets/logoGym.png" alt="Logo">
+            </div>
+            <div class="w-full flex justify-center gap-x-40 pb-44">
+                <div (click)="selectTicket('dnevna')" routerLink="/order" class="w-[280px] h-[180px] cursor-pointer bg-linear-to-r from-green-100 via-emerald-200 to-teal-200 rounded flex flex-col items-center justify-center">
+                    <p class="uppercase text-xl text-emerald-800">{{ currentText[0] }}</p>
+                    <img width="90px" src="assets/ticket.png" alt="Logo">
+                    <p class="uppercase text-xl text-emerald-800">200 rsd</p>
+                </div>
+                <div (click)="selectTicket('mesecna')" routerLink="/order" class="w-[280px] h-[180px] cursor-pointer bg-linear-to-r from-green-300 via-emerald-500 to-teal-700 rounded flex flex-col items-center justify-center">
+                    <p class="uppercase text-xl text-white">{{ currentText[1] }}</p>
+                    <img width="90px" src="assets/name-tag.png" alt="Logo">
+                    <p class="uppercase text-xl text-white">2500 rsd</p>
+                </div>
+            </div>
+            <div class="text-2xl flex text-teal-50 uppercase space-x-6">
+            </div>
+        </div>
+    </div>
+</div>

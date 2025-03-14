@@ -1,0 +1,243 @@
+<div class="h-screen w-screen bg-cover bg-center" [ngStyle]="{'background-image': 'url(' + backgroundUrl + ')'}">
+    <div class="w-full h-full outfit">
+        <div class="w-full h-full py-10 flex flex-col items-center relative">
+            <div (click)="logout()"
+                class="absolute top-14 left-10 flex items-center uppercase space-x-2 text-[#47bfa6] cursor-pointer">
+                <img src="assets/shutDown.png" alt="Logo" width="34px">
+                <p>Odjavi se</p>
+            </div>
+            <div class="w-24">
+                <img src="assets/logoGym.png" alt="Logo">
+            </div>
+            <div class="w-full xl:w-8/12 mb-12 xl:mb-0 px-4 mx-auto mt-24">
+                <div class="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded ">
+                    <div class="rounded-t mb-0 px-4 py-3 border-0">
+                        <div class="flex flex-wrap items-center">
+                            <div class="relative w-full px-4 max-w-full flex-grow flex-1">
+                                <h3 class="font-semibold text-xl text-emerald-900 uppercase">Broj korisnika:
+                                    {{brojKorisnika}}</h3>
+                            </div>
+                            <div class="relative w-full px-4 max-w-full flex-1 text-right flex justify-end">
+                                <div class="flex justify-center items-center pt-2">
+                                    <img (click)="loadUsers()" src="assets/repeat.png" alt="Logo" width="25px"
+                                        class="cursor-pointer">
+                                </div>
+                                <div class="flex justify-center items-center pt-2">
+                                    <img (click)="openModal()" src="assets/plus.png" alt="Logo" width="34px"
+                                        class="cursor-pointer">
+                                </div>
+                                <div class="pt-2 relative text-emerald-900">
+                                    <input [(ngModel)]="searchTerm"
+                                        class="border-2 border-gray-300 bg-white h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none"
+                                        type="search" name="search" placeholder="Pretraži korisnike...">
+                                    <button type="submit" class="absolute right-0 top-0 mt-5 mr-4">
+                                        <svg class="text-gray-600 h-4 w-4 fill-current"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px"
+                                            y="0px" viewBox="0 0 56.966 56.966"
+                                            style="enable-background:new 0 0 56.966 56.966;" xml:space="preserve"
+                                            width="512px" height="512px">
+                                            <path
+                                                d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="block w-full h-[540px] overflow-x-auto">
+                        <table class="items-center w-full border-collapse">
+                            <thead class="text-gray-900">
+                                <tr>
+                                    <th
+                                        class="px-6 align-middle border border-solid py-3 text-lg uppercase border-l-0 border-r-0 whitespace-nowrap text-left">
+                                        Ime
+                                    </th>
+                                    <th
+                                        class="px-6 align-middle border border-solid py-3 text-lg uppercase border-l-0 border-r-0 whitespace-nowrap text-left">
+                                        Prezime
+                                    </th>
+                                    <th
+                                        class="px-6 align-middle border border-solid py-3 text-lg uppercase border-l-0 border-r-0 whitespace-nowrap text-left">
+                                        E-mail
+                                    </th>
+                                    <th
+                                        class="px-6 align-middle border border-solid py-3 text-lg uppercase border-l-0 border-r-0 whitespace-nowrap text-center">
+                                        Preostali broj ulazaka
+                                    </th>
+                                    <th
+                                        class="px-6 align-middle border border-solid py-3 text-lg uppercase border-l-0 border-r-0 whitespace-nowrap text-center">
+                                        Vrsta korisnika
+                                    </th>
+                                    <th
+                                        class="px-6 align-middle border border-solid py-3 text-lg uppercase border-l-0 border-r-0 whitespace-nowrap text-center">
+                                        
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody *ngFor="let korisnik of filteredKorisnici()" class="text-gray-900">
+                                <tr>
+                                    <th
+                                        class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-lg whitespace-nowrap p-4 text-left">
+                                        {{korisnik.ime}}
+                                    </th>
+                                    <td
+                                        class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-lg whitespace-nowrap p-4 ">
+                                        {{korisnik.prezime}}
+                                    </td>
+                                    <td
+                                        class="border-t-0 px-6 align-center border-l-0 border-r-0 text-lg whitespace-nowrap p-4">
+                                        {{korisnik.email}}
+                                    </td>
+                                    <td
+                                        class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-lg text-center whitespace-nowrap p-4">
+                                        {{korisnik.broj_ulazaka}}
+                                    </td>
+                                    <td *ngIf="korisnik.admin == 1 && korisnik.trener == 0"
+                                        class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-lg whitespace-nowrap p-4 text-center">
+                                        Admin
+                                    </td>
+                                    <td *ngIf="korisnik.admin == 0 && korisnik.trener == 0"
+                                        class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-lg whitespace-nowrap p-4 text-center">
+                                        Korisnik
+                                    </td>
+                                    <td *ngIf="korisnik.admin == 0 && korisnik.trener == 1"
+                                        class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-lg whitespace-nowrap p-4 text-center">
+                                        Trener
+                                    </td>
+                                    <td
+                                        class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-lg whitespace-nowrap p-4 text-center flex justify-center space-x-2">
+                                        <button (click)="loadSingleUser(korisnik.id)" type="button"
+                                            class="text-white bg-[#47bfa6] hover:bg-[#58a38e] focus:ring-4 focus:ring-cyan-300 font-medium rounded-lg text-sm px-4 py-2 focus:outline-none">Izmeni</button>
+                                        <button (click)="deleteUser(korisnik.id)" type="button"
+                                            class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 focus:outline-none">Obriši</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal container -->
+    <div *ngIf="isModalOpen"
+        class="fixed top-0 left-0 right-0 bottom-0 z-50 flex items-center justify-center bg-gray-950/90">
+        <div
+            class="relative p w-full max-w-xl md:max-w-2xl bg-white rounded-lg shadow max-h-[90vh] overflow-y-auto mx-4 md:mx-0">
+            <!-- Modal header -->
+            <div class="sticky top-0 flex items-center justify-between pt-4 pl-36 pr-6 rounded-t bg-white">
+                <h3 class="text-xl font-semibold text-gray-900">
+                    Dodaj korisnika
+                </h3>
+                <button (click)="closeModal()"
+                    class="cursor-pointer text-gray-400 bg-transparent hover:bg-[#47bfa6] hover:text-gray-100 rounded-lg text-sm w-8 h-8 flex items-center justify-center">
+                    <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <div class="container mx-auto py-8">
+                <div *ngIf="successmsg" class="p-4 mb-4 text-lg text-white text-center rounded-lg mx-[145px] bg-[#47bfa6]" role="alert">
+                    <span>{{successmsg}}</span>
+                </div>
+                <div *ngIf="errorMessage" class="p-4 mb-4 text-lg text-white text-center rounded-lg mx-[145px] bg-red-600" role="alert">
+                    <span>{{errorMessage}}</span>
+                </div>
+                <form [formGroup]="userForm" (ngSubmit)="userSubmit()" class="w-full max-w-sm mx-auto bg-white p-8 rounded-md shadow-md border-2 border-[#47bfa6]">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-bold mb-2" for="name">Ime</label>
+                        <input formControlName="ime"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[#47bfa6]"
+                            type="text" id="name" name="name">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-bold mb-2" for="email">Prezime</label>
+                        <input formControlName="prezime"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[#47bfa6]"
+                            type="email" id="lastName" name="lastName">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-bold mb-2" for="email">E-mail</label>
+                        <input formControlName="email"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[#47bfa6]"
+                            type="email" id="email" name="email">
+                    </div>
+                    <div class="mb-4">
+                        <select formControlName="type" id="type"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#47bfa6] focus:border-[#47bfa6] block w-1/2 mb-6 p-1">
+                            <option selected value="korisnik">Korisnik</option>
+                            <option value="trener">Trener</option>
+                        </select>
+                    </div>
+                    <button
+                        class="w-full cursor-pointer bg-[#47bfa6] text-white uppercase font-bold py-2 px-4 rounded-md hover:bg-[#58a38e] transition duration-300"
+                        type="submit">Dodaj</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="isModalOpenSecond"
+    class="fixed top-0 left-0 right-0 bottom-0 z-50 flex items-center justify-center bg-gray-950/90">
+    <div
+        class="relative p w-full max-w-xl md:max-w-2xl bg-white rounded-lg shadow max-h-[90vh] overflow-y-auto mx-4 md:mx-0">
+        <!-- Modal header -->
+        <div class="sticky top-0 flex items-center justify-between pt-4 pl-36 pr-6 rounded-t bg-white">
+            <h3 class="text-xl font-semibold text-gray-900">
+                Izmena korisnika
+            </h3>
+            <button (click)="closeModalSecond()"
+                class="cursor-pointer text-gray-400 bg-transparent hover:bg-[#47bfa6] hover:text-gray-100 rounded-lg text-sm w-8 h-8 flex items-center justify-center">
+                <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                </svg>
+                <span class="sr-only">Close modal</span>
+            </button>
+        </div>
+        <!-- Modal body -->
+        <div class="container mx-auto py-8">
+            <div *ngIf="successmsg" class="p-4 mb-4 text-lg text-white text-center rounded-lg mx-[145px] bg-[#47bfa6]" role="alert">
+                <span>{{successmsg}}</span>
+            </div>
+            <div *ngIf="errorMessage" class="p-4 mb-4 text-lg text-white text-center rounded-lg mx-[145px] bg-red-600" role="alert">
+                <span>{{errorMessage}}</span>
+            </div>
+            <form [formGroup]="userUpdateForm" (ngSubmit)="userUpdate()" class="w-full max-w-sm mx-auto bg-white p-8 rounded-md shadow-md border-2 border-[#47bfa6]">
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2" for="name">Ime</label>
+                    <input formControlName="ime"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[#47bfa6]"
+                        type="text" id="name" name="name">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2" for="email">Prezime</label>
+                    <input formControlName="prezime"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[#47bfa6]"
+                        type="email" id="lastName" name="lastName">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2" for="email">E-mail</label>
+                    <input formControlName="email"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[#47bfa6]"
+                        type="email" id="email" name="email">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2" for="email">Broj ulazaka</label>
+                    <input formControlName="broj_ulazaka"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[#47bfa6]"
+                        type="email" id="email" name="email">
+                </div>
+                <button
+                    class="w-full cursor-pointer bg-[#47bfa6] text-white uppercase font-bold py-2 px-4 rounded-md hover:bg-[#58a38e] transition duration-300"
+                    type="submit">Izmeni</button>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
