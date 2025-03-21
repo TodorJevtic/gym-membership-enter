@@ -13,9 +13,6 @@
       </div>
       <div class="container mx-auto py-8 pt-40">
         <div class="flex justify-center">
-          <div *ngIf="successmsg" class="p-4 w-[375px] mb-4 text-lg text-white text-center rounded-lg bg-[#47bfa6]" role="alert">
-            <span>{{successmsg}}</span>
-          </div>
           <div *ngIf="errorMessage" class="p-4 w-[375px] mb-4 text-lg text-white text-center rounded-lg bg-red-600" role="alert">
             <span>{{errorMessage}}</span>
           </div>
@@ -47,4 +44,31 @@
       </div>
     </div>
   </div>
+  <div *ngIf="isModalOpen"
+  class="fixed top-0 left-0 right-0 bottom-0 z-50 flex items-center justify-center bg-gray-950/90">
+  <div
+      class="relative p w-full max-w-xl md:max-w-2xl bg-white rounded-lg shadow max-h-[90vh] overflow-y-auto mx-4 md:mx-0">
+      <!-- Modal header -->
+      <div class="sticky top-0 flex items-center justify-end pt-4 pl-4 pr-6 rounded-t bg-white">
+          <button (click)="closeModal()"
+              class="cursor-pointer text-gray-400 bg-transparent hover:bg-[#47bfa6] hover:text-gray-100 rounded-lg text-sm w-8 h-8 flex items-center justify-center">
+              <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                  viewBox="0 0 14 14">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+              </svg>
+              <span class="sr-only">Close modal</span>
+          </button>
+      </div>
+      <!-- Modal body -->
+      <div class="container mx-auto py-8 flex flex-col justify-center items-center">
+        <div *ngIf="successmsg" class="p-4  mb-4 text-lg text-white text-center rounded-lg bg-[#47bfa6]" role="alert">
+          <span>{{successmsg}}</span>
+        </div>
+        <span>Vreme preostalo za skeniranje</span>
+        <span>{{ minutes | number:'2.0-0' }}:{{ seconds | number:'2.0-0' }}</span>
+        <img [src]="qrCodeImage" *ngIf="qrCodeImage" alt="QR Code">
+      </div>
+  </div>
+</div>
 </div>

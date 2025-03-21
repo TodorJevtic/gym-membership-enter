@@ -2,14 +2,12 @@ const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql");
 const dotenv = require("dotenv");
+const qr = require('qrcode');
+const nodemailer = require('nodemailer');
+const fs = require('fs');
+require('dotenv').config({ path: '../.env' });
 
 const jwt = require('jsonwebtoken');
-
-const SECRET_KEY = 'plave_oci';
-
-dotenv.config({
-    path: './.env'
-})
 
 const app = express();
 app.use(express.json());
@@ -40,12 +38,48 @@ app.listen(port, ()=>{
     console.log("Website served on " + port)
 })
 
-app.get("/", (req, res) =>{
-    res.send("hello world")
-})
+async function generateQrCode(data) {
+    try {
+        const jsonString = JSON.stringify(data);
+        return await qr.toDataURL(jsonString); // Generiše QR kod u Base64 formatu
+    } catch (err) {
+        console.error('Greška pri generisanju QR koda:', err);
+        throw new Error('Neuspešno generisanje QR koda');
+    }
+}
+//slanje mejla 
+async function sendEmailWithQrCode(recipient, qrData) {
+    try {
+        const qrCodeBase64 = await generateQrCode(qrData);
+        const qrCodeBuffer = Buffer.from(qrCodeBase64.split(',')[1], 'base64'); // Konvertujemo Base64 u Buffer
 
-function generateQrCode() {
-    return Math.random().toString(36).substring(2, 15); // Generiše random string kao QR kod
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: recipient,
+            subject: 'Vaš QR Kod za ulazak',
+            text: 'Poštovani, ovde je vaš QR kod za ulazak.',
+            attachments: [
+                {
+                    filename: 'qrcode.png',
+                    content: qrCodeBuffer,
+                    encoding: 'base64'
+                }
+            ]
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Mejl uspešno poslat:', info.response);
+    } catch (error) {
+        console.error('Greška pri slanju mejla:', error);
+    }
 }
 
 //get all data
@@ -200,7 +234,7 @@ app.delete('/user/:id',(req,res)=>{
 })
 
 //buy ticket for user 
-app.post('/buyTicket', (req, res) => {
+app.post('/buyTicket', async (req, res) => {
 
     let ime = req.body.ime;
     let prezime = req.body.prezime;
@@ -224,37 +258,56 @@ app.post('/buyTicket', (req, res) => {
     }
     datum_isteka_clanstva = datum_isteka_clanstva.toISOString().split('T')[0];
 
-    let qr_kod = generateQrCode();
+    let qr_kod = {
+        ime,
+        prezime,
+        email,
+        vrstaKarte,
+        datum_pocetka_clanstva,
+        datum_isteka_clanstva,
+        broj_ulazaka
+    };
 
-    // Provera da li email već postoji u bazi
-    let checkEmailQuery = `SELECT * FROM users WHERE email = ?`;
+    try {
+        let qrCodeImage = await generateQrCode(qr_kod); // Generišemo QR kod iz JSON objekta
 
-    db.query(checkEmailQuery, [email], (err, results) => {
-        if (err) {
-            return res.send({ message: 'Greška u bazi podataka' });
-        }
-
-        if (results.length > 0) {
-            return res.send({ message: 'Email je već zauzet!' });
-        }
-
-        if (!ime || !prezime || !email || !vrstaKarte) {
-            return res.send({ message: 'Sva polja su obavezna!' });
-        }
-        if (!email.includes('@')) {
-            return res.send({ message: 'Email nije validan!' });
-        }
-
-        let insertQuery = `INSERT INTO users(ime,prezime,email,password,broj_ulazaka,datum_pocetka_clanstva,datum_isteka_clanstva,qr_kod,admin,trener) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-        db.query(insertQuery, [ime, prezime, email, password, broj_ulazaka, datum_pocetka_clanstva, datum_isteka_clanstva, qr_kod, admin, trener], (err, result) => {
+        let checkEmailQuery = `SELECT * FROM users WHERE email = ?`;
+        db.query(checkEmailQuery, [email], (err, results) => {
             if (err) {
-                console.log(err);
-                return res.send({ message: 'Greška pri dodavanju korisnika!' });
+                return res.send({ message: 'Greška u bazi podataka' });
             }
-            res.send({ message: 'Uspešno ste uplatili članarinu' });
+
+            if (results.length > 0) {
+                return res.send({ message: 'Email je već zauzet!' });
+            }
+
+            if (!ime || !prezime || !email || !vrstaKarte) {
+                return res.send({ message: 'Sva polja su obavezna!' });
+            }
+            if (!email.includes('@')) {
+                return res.send({ message: 'Email nije validan!' });
+            }
+
+            let insertQuery = `INSERT INTO users(ime,prezime,email,password,broj_ulazaka,datum_pocetka_clanstva,datum_isteka_clanstva,qr_kod,admin,trener) 
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+            db.query(insertQuery, [ime, prezime, email, password, broj_ulazaka, datum_pocetka_clanstva, datum_isteka_clanstva, JSON.stringify(qr_kod), admin, trener], async(err, result) => {
+                if (err) {
+                    console.log(err);
+                    return res.send({ message: 'Greška pri dodavanju korisnika!' });
+                }
+                try {
+                    await sendEmailWithQrCode(email, qr_kod); // Slanje mejla sa QR kodom
+                    res.send({ message: 'Uspešno ste uplatili članarinu', qrCode: qrCodeImage });
+                } catch (emailErr) {
+                    console.log(emailErr);
+                    res.send({ message: 'Uspešno ste uplatili članarinu, ali došlo je do greške pri slanju mejla!' });
+                }
+            });
         });
-    });
+    } catch (err) {
+        res.send({ message: 'Greška pri generisanju QR koda' });
+    }
 });
 
 //login user
@@ -273,11 +326,11 @@ app.post('/login', (req, res) => {
             const user = result[0];
 
             // Generisanje JWT tokena
-            const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, { expiresIn: '1h' });
+            const token = jwt.sign({ id: user.id, email: user.email }, process.env.SECRET_KEY, { expiresIn: '1h' });
 
             res.send({ message: 'Uspešno ste se prijavili', token });
         } else {
-            res.status(401).send({ message: 'Pogrešan email ili lozinka!' });
+            res.send({ message: 'Pogrešan email ili lozinka!' });
         }
     });
 });
@@ -289,7 +342,7 @@ const verifyToken = (req, res, next) => {
         return res.status(403).send({ message: 'Pristup zabranjen! Token nije obezbeđen.' });
     }
 
-    jwt.verify(token, SECRET_KEY, (err, decoded) => {
+    jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
         if (err) {
             return res.status(401).send({ message: 'Nevažeći token!' });
         }
@@ -305,3 +358,65 @@ app.post('/logout', (req, res) => {
 app.get('/admin', verifyToken, (req, res) => {
     res.send({ message: 'Dobrodošli u Admin panel', user: req.user });
 });
+
+app.post('/checkMembership', (req, res) => {
+    const { email } = req.body;
+    const query = `SELECT * FROM users WHERE email = ?`;
+    db.query(query, [email], (err, result) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).send({ message: 'Greška u bazi podataka' });
+        }
+        if (!email.includes('@')) {
+            return res.send({ message: 'Email nije validan!' });
+        }
+        if (result.length > 0) {
+            const user = result[0];
+            res.send({ message: 'Uspesno', user });
+        } else {
+            res.send({ message: 'Korisnik ne postoji!' });
+        }
+    });
+});
+
+//communication with arduino port 
+
+const { SerialPort } = require('serialport');
+const { ReadlineParser } = require('@serialport/parser-readline');
+
+// Inicijalizacija serijskog porta
+const arduinoPort = new SerialPort({
+    path: 'COM3',
+    baudRate: 9600,
+    dataBits: 8,
+    parity: 'none',
+    stopBits: 1,
+    flowControl: false,
+    autoOpen: false // Ručno otvaranje kako bismo mogli da obradimo greške
+});
+
+// Inicijalizacija parsera
+const parser = arduinoPort.pipe(new ReadlineParser({ delimiter: '\r\n' }));
+
+// Otvaranje porta i obrada grešaka
+arduinoPort.open((err) => {
+    if (err) {
+        console.error('Greška pri otvaranju porta:', err.message);
+        return;
+    }
+    console.log('Serijski port otvoren.');
+});
+
+// Obrada podataka sa Arduina
+parser.on('data', (data) => {
+    console.log('Primljeni podaci:', data);
+});
+
+// Obrada grešaka na serijskom portu
+arduinoPort.on('error', (err) => {
+    console.error('Greška na serijskom portu:', err.message);
+});
+
+
+
+

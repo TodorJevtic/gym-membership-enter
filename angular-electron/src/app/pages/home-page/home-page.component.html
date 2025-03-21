@@ -10,6 +10,10 @@
             <p>{{ currentText[2] }}:</p>
             <p>{{balance}} RSD</p>
         </div>
+        <div (click)="openModal()" class="absolute top-28 right-10 text-xl text-green-50 p-3 flex items-center cursor-pointer" >
+            <img width="25px" src="assets/ticket.png" alt="Logo">
+            <p>{{ currentText[3] }}</p>
+        </div>
         <div class="w-full h-full py-10 flex flex-col items-center justify-between">
             <div class="w-24">
                 <img routerLink="/login" src="assets/logoGym.png" alt="Logo">
@@ -29,5 +33,43 @@
             <div class="text-2xl flex text-teal-50 uppercase space-x-6">
             </div>
         </div>
+        <div *ngIf="isModalOpen"
+        class="fixed top-0 left-0 right-0 bottom-0 z-50 flex items-center justify-center bg-gray-950/90">
+        <div
+            class="relative p w-full max-w-xl md:max-w-2xl bg-white rounded-lg shadow max-h-[90vh] overflow-y-auto mx-4 md:mx-0">
+            <!-- Modal header -->
+            <div class="sticky top-0 flex items-center justify-end pt-4 pl-4 pr-6 rounded-t bg-white">
+                <button (click)="closeModal()"
+                    class="cursor-pointer text-gray-400 bg-transparent hover:bg-[#47bfa6] hover:text-gray-100 rounded-lg text-sm w-8 h-8 flex items-center justify-center">
+                    <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <div class="container mx-auto py-14">
+                <div *ngIf="successmsg" class="p-4 mb-4 text-lg text-white text-center rounded-lg mx-[145px] bg-[#47bfa6]" role="alert">
+                    <span [innerHTML]="successmsg"></span>
+                </div>
+                <div *ngIf="errorMessage" class="p-4 mb-4 text-lg text-white text-center rounded-lg mx-[145px] bg-red-600" role="alert">
+                    <span>{{errorMessage}}</span>
+                </div>
+                <form [formGroup]="membershipForm" (ngSubmit)="membershipCheck()" class="w-full max-w-sm mx-auto bg-white p-8 rounded-md shadow-md border-2 border-[#47bfa6]">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-bold mb-2" for="email">E-mail</label>
+                        <input formControlName="email"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[#47bfa6]"
+                            type="email" id="email" name="email">
+                    </div>
+                    <button
+                        class="w-full cursor-pointer bg-[#47bfa6] text-white uppercase font-bold py-2 px-4 rounded-md hover:bg-[#58a38e] transition duration-300"
+                        type="submit">Proveri</button>
+                </form>
+            </div>
+        </div>
+      </div>
     </div>
 </div>

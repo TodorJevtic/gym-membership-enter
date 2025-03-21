@@ -12,6 +12,7 @@ export class ApiService {
   apiUrl = 'http://localhost:5000/user';
   apiUrlAllUsers = 'http://localhost:5000/users';
   buyTicketUrl = 'http://localhost:5000/buyTicket';
+  checkMembershipUrl = 'http://localhost:5000/checkMembership';
 
   private selectedTicketType = new BehaviorSubject<string>('');
   selectedTicketType$ = this.selectedTicketType.asObservable();
@@ -47,6 +48,11 @@ export class ApiService {
 
   buyTicket(data: any): Observable<any> {
     return this.http.post(`${this.buyTicketUrl}`, data);
+  }
+
+  checkMembership(data: any): Observable<any> {
+    console.log(data);
+    return this.http.post(`${this.checkMembershipUrl}`, data);
   }
 
 }
